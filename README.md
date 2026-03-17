@@ -1,7 +1,7 @@
 <div align="center">
   <h1>Epistemic Temporal Integrity Protocol (ETIP) v1.0</h1>
   <p><strong>Request for Comments: 1.0</strong></p>
-  <p>Category: Standards Track | Status: Final | March 2026</p>
+  <p>epistemic.center | Category: Standards Track | March 2026</p>
 </div>
 
 <hr />
@@ -18,7 +18,7 @@
   <li>3. <a href="#integrity">Integrity Mechanism</a></li>
   <li>4. <a href="#conformance">Conformance Levels</a></li>
   <li>5. <a href="#infra">Infrastructure Requirements</a></li>
-  <li>6. <a href="#witness">The Witnessing Rule (Classes A, B, C)</a></li>
+  <li>6. <a href="#witness">The Witnessing Rule (Redundancy Combinations)</a></li>
   <li>7. <a href="#data-model">Data Model & Witness Schema</a></li>
   <li>8. <a href="#verification">Verification Algorithm</a></li>
   <li>9. <a href="#appendix">Appendix A: Reference Implementation Logic</a></li>
@@ -27,10 +27,10 @@
 <hr />
 
 <h2 id="license">0. License & Legal Shield</h2>
-<p>This protocol specification is licensed under the <strong>Apache License, Version 2.0</strong>. Implementers are solely responsible for deployment security and cryptographic key management.</p>
+<p>This protocol is licensed under the <strong>Apache License, Version 2.0</strong>. Implementers are solely responsible for deployment security and cryptographic key management.</p>
 
 <h2 id="abstract">1. Abstract</h2>
-<p>ETIP-1.0 defines a decentralized mechanism for temporal data integrity. It utilizes <strong>Recursive SHA-256 Chaining</strong> and <strong>Identity-Linked Ed25519 Signatures</strong> to establish an immutable timeline. The protocol is optimized for execution within a <strong>10ms CPU cycle</strong>, ensuring integrity verification functions as a nominal cost in global infrastructure.</p>
+<p>ETIP-1.0 defines a decentralized mechanism for temporal data integrity. It utilizes <b>Recursive SHA-256 Chaining</b> and <b>Identity-Linked Ed25519 Signatures</b>. The protocol is optimized for a <b>10ms CPU cycle</b>, ensuring integrity functions as a nominal cost in global infrastructure.</p>
 
 <h2 id="topology">2. System Topology</h2>
 <pre>
@@ -42,34 +42,32 @@
 </pre>
 
 <h2 id="integrity">3. Integrity Mechanism</h2>
-<p>Each record incorporates the cumulative state of all prior records via recursive hashing. Any modification of historical data results in a complete divergence of the current <strong>Rolling Hash (h_roll)</strong>.</p>
-<pre>
-h_roll[n] = SHA256( h_roll[n-1] + record_fp[n] )
-</pre>
+<p>Each record incorporates the cumulative state of all prior records. Modification of historical data results in a complete divergence of the current <b>Rolling Hash (h_roll)</b>.</p>
+<pre>h_roll[n] = SHA256( h_roll[n-1] + record_fp[n] )</pre>
 
 <h2 id="conformance">4. Conformance Levels</h2>
 <ul>
-  <li><strong>ETIP-Compatible:</strong> Implements sequential hashing and prev-linking.</li>
-  <li><strong>ETIP-Conformant:</strong> Implements Ed25519 signatures, recursive h_roll, and mandatory multi-class external witnessing.</li>
+  <li><b>ETIP-Compatible:</b> Sequential hashing and prev-linking.</li>
+  <li><b>ETIP-Conformant:</b> Ed25519 signatures, recursive h_roll, and mandatory multi-class external witnessing.</li>
 </ul>
 
 <h2 id="infra">5. Infrastructure Requirements</h2>
 <ul>
-  <li><strong>Computational Efficiency:</strong> Processing MUST NOT exceed 10ms per record.</li>
-  <li><strong>Data Handling:</strong> Protocol operates on raw byte-streams (Blob-First) to minimize serialization overhead.</li>
+  <li><b>CPU Budget:</b> Processing MUST NOT exceed 10ms per record.</li>
+  <li><b>Format:</b> Protocol operates on raw byte-streams (Blob-First).</li>
 </ul>
 
-<h2 id="witness">6. The Witnessing Rule (Classes A, B, C)</h2>
-<p>To establish objective truth, the final state hash MUST be published to independent channels:</p>
+<h2 id="witness">6. The Witnessing Rule & Redundancy</h2>
+<p>Final state hashes MUST be published to independent channels to achieve objective consensus.</p>
+<h4>6.1 Valid Witness Combinations</h4>
+<p>A log is considered <b>Forensically Sealed</b> only if it meets one of these combinations:</p>
 <ul>
-  <li><strong>Class A (Public Utility):</strong> High-availability, neutral publication service.</li>
-  <li><strong>Class B (Peer Witness):</strong> Cross-witnessing between independent operators.</li>
-  <li><strong>Class C (TSA):</strong> RFC 3161 Time Stamping Authority for certified temporal evidence.</li>
+  <li><b>Class A + Class B:</b> Public Utility + Independent Peer.</li>
+  <li><b>Class B + Class B:</b> Two independent Peer Witnesses.</li>
+  <li><b>Class A/B + Class C:</b> Either Utility or Peer + RFC 3161 TSA Certificate.</li>
 </ul>
 
 <h2 id="data-model">7. Data Model & Witness Schema</h2>
-
-<h4>7.1 Commit Record (Internal)</h4>
 <pre>
 {
   "v": "1.0",
@@ -79,34 +77,50 @@ h_roll[n] = SHA256( h_roll[n-1] + record_fp[n] )
   "h_roll": "hex",          // Recursive State Hash
   "pub_key": "hex",         // Ed25519 Public Key
   "sig": "hex",             // Signature of h_roll
-  "record_fp": "hex"        // SHA-256 of Record Object
+  "record_fp": "hex"        // SHA-256 of all fields EXCEPT record_fp
 }
 </pre>
-
-<h4>7.2 Witness Receipt (External)</h4>
-<pre>
-{
-  "v": "1.0",
-  "type": "witness_receipt",
-  "timestamp": "unix_ts",
-  "h_roll_root": "hex",
-  "witness_sig": "hex",
-  "witness_ref": "uri"
-}
-</pre>
-
-<h4>7.3 Continuity Record (Initialization)</h4>
-<p>The first record of a new epoch MUST embed the previous epoch's Witness Receipt to ensure continuity.</p>
 
 <h2 id="verification">8. Verification Algorithm</h2>
 <ol>
-  <li>Recompute the SHA-256 chain from a known-good state.</li>
-  <li>Verify Ed25519 signatures for attribution.</li>
-  <li>Match the final cumulative hash against published Witness Receipts from Class A, B, or C.</li>
+  <li>Retrieve initial state (<code>h_roll_0</code>) from a Witness Receipt.</li>
+  <li>For each record, re-calculate <code>record_fp</code> and then <code>h_roll[n]</code>.</li>
+  <li>Verify Ed25519 signature of <code>h_roll[n]</code> matches <code>pub_key</code>.</li>
+  <li>Match the terminal <code>h_roll[end]</code> against the target Witness Receipt.</li>
 </ol>
 
 <h2 id="appendix">9. Appendix A: Reference Implementation Logic</h2>
-<p>Implementations MUST support hardware-accelerated SHA-256. A conforming environment MUST be capable of verifying 1,000 records per second.</p>
+
+<h4>A.1 The Commit Loop (Pseudo-code)</h4>
+<pre>
+Function Commit(artifact, log_state):
+    1.  h_art = SHA256(artifact)
+    2.  seq = log_state.next_seq++
+    3.  // Construct Record
+        payload = { v: "1.0", log_id: log_state.id, seq: seq, h_art: h_art, pub_key: log_state.pub_key }
+    4.  record_fp = SHA256(payload)
+    5.  // Chaining
+        h_roll = SHA256(log_state.last_h_roll + record_fp)
+    6.  // Attribution
+        sig = Ed25519_Sign(log_state.private_key, h_roll)
+    7.  Save Record { ...payload, h_roll, sig, record_fp }
+    8.  log_state.last_h_roll = h_roll
+</pre>
+
+<h4>A.2 Divergence Detection (The Audit)</h4>
+<pre>
+Function Verify(record_n, h_roll_prev):
+    1.  // Verify Record Integrity
+        calc_fp = SHA256(record_n fields minus record_fp)
+        IF calc_fp != record_n.record_fp: RETURN "Data Corrupted"
+    2.  // Verify Chain Continuity
+        calc_roll = SHA256(h_roll_prev + record_n.record_fp)
+        IF calc_roll != record_n.h_roll: RETURN "Chain Divergence"
+    3.  // Verify Attribution
+        IF !Ed25519_Verify(record_n.pub_key, record_n.sig, record_n.h_roll):
+            RETURN "Signature Invalid"
+    RETURN "Valid"
+</pre>
 
 <hr />
 <div align="center">
