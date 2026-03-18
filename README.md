@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
-
 <h1>Epistemic Temporal Integrity Protocol (ETIP) v1.1</h1>
 <p>
 <span class="badge">Standards Track</span>
@@ -19,188 +11,209 @@
 ETIP exists to solve a simple, stubborn problem: data can be quietly rewritten.
 </p>
 <p>
-In many real-world systems—especially ESG reporting—numbers change over time. Sometimes legitimately. Sometimes conveniently. What is often missing is not the data itself, but a reliable way to answer a more important question:
+In systems like ESG reporting, numbers do not just exist — they evolve. What is often lost is not the latest value, but the history of how that value came to be.
 </p>
 <blockquote>
-What did you say before—and did you change it later?
+What did you say before — and did you change it later?
 </blockquote>
 <p>
-ETIP does not attempt to prove whether data is true. It does not judge correctness, quality, or completeness.
+ETIP is designed so that this question always has an answer.
 </p>
 <p>
-Instead, it enforces something more fundamental:
+It does not try to prove truth. It does not judge correctness. It does not enforce honesty.
+</p>
+<p>
+Instead, it does something narrower, but more reliable:
 </p>
 <blockquote>
-Once data is recorded, it cannot be silently rewritten without leaving evidence.
+It makes it impossible to rewrite the past without leaving evidence.
 </blockquote>
 </div>
 
 <div class="section">
-<h2>2. What ETIP Guarantees (and What It Does Not)</h2>
-<p><b>ETIP guarantees:</b></p>
+<h2>2. Design Positioning</h2>
+<p>
+ETIP is a post-blockchain system, but more importantly, it is post-heavy infrastructure.
+</p>
+<p>
+It keeps what mattered — chaining, fingerprinting, external witnessing — and removes what did not: consensus overhead, global coordination, and energy-intensive operation.
+</p>
+<blockquote>
+ETIP takes what worked, and removes what didn’t.
+</blockquote>
+<p>
+It is not designed for consensus. It is not designed for markets. It is not designed for scale at any cost.
+</p>
+<p>
+It is designed for one thing only: preserving the integrity of data over time.
+</p>
+</div>
+
+<div class="section">
+<h2>3. Historical Lineage</h2>
+<p>
+ETIP stands on existing ideas rather than replacing them.
+</p>
 <ul>
-<li>Records are append-only (history cannot be rewritten invisibly)</li>
-<li>Changes to data become visible as new entries</li>
-<li>A record existed no later than a verifiable external publication</li>
-<li>The sequence of records has not been tampered with</li>
+<li>Hash chaining — linking records so the past cannot be changed silently</li>
+<li>Merkle aggregation — compressing many records into a single proof</li>
+<li>Public witnessing — anchoring data outside the control of its creator</li>
+<li>Modern cryptographic primitives — fast, deterministic, widely available</li>
+</ul>
+<p>
+These are not new inventions. ETIP simply combines them into a minimal, usable form.
+</p>
+</div>
+
+<div class="section">
+<h2>4. What ETIP Guarantees</h2>
+<ul>
+<li>History is append-only</li>
+<li>Changes are visible</li>
+<li>Past records cannot be silently altered</li>
+<li>A record existed no later than when it was witnessed externally</li>
 </ul>
 
-<p><b>ETIP does NOT guarantee:</b></p>
+<p><b>ETIP does not guarantee:</b></p>
 <ul>
-<li>That data is correct</li>
-<li>That all data has been disclosed</li>
+<li>That the data is correct</li>
+<li>That all data was disclosed</li>
 <li>That measurements were accurate</li>
-<li>That actors behaved honestly</li>
 </ul>
-
-<p>
-This distinction is intentional. ETIP is an integrity protocol, not a truth engine.
-</p>
 </div>
 
 <div class="section">
-<h2>3. Core Idea (Plain Language)</h2>
+<h2>5. Core Mechanism</h2>
 <p>
-Each piece of data is converted into a unique fingerprint. That fingerprint depends on the exact contents of the data.
+Each record is reduced to a fingerprint.
 </p>
 <p>
-Each new record links to the one before it. This creates a chain.
+Each fingerprint links to the previous one.
+</p>
+<p>
+This creates a chain.
 </p>
 <p>
 If any past record is changed, the chain breaks.
 </p>
 <p>
-Periodically, the latest state of the chain is published to independent external systems. These act as witnesses.
+The chain is periodically published to independent witnesses.
 </p>
 <p>
-Because these witnesses are outside the control of the data owner, the history cannot be secretly rewritten after publication.
+Because those witnesses are outside the system, the past cannot be rewritten after publication.
 </p>
 </div>
 
 <div class="section">
-<h2>4. Time Semantics</h2>
+<h2>6. Time</h2>
 <p>
-ETIP does not prove when something was created.
-</p>
-<p>
-It proves something weaker—but reliable:
+ETIP does not prove exact time.
 </p>
 <blockquote>
-A record existed no later than the moment it was independently witnessed.
+It proves that something existed no later than when it was witnessed.
 </blockquote>
 <p>
-This avoids reliance on internal clocks, which can be manipulated, and instead relies on external publication that cannot be rewritten.
+This avoids trusting internal clocks, and instead relies on external history.
 </p>
 </div>
 
 <div class="section">
-<h2>5. The Rule of Two (Witnessing)</h2>
+<h2>7. Witnessing</h2>
 <p>
-For a record to be considered forensically sealed, it must be published to at least two independent witness channels.
+A record is only meaningful if it is seen outside its own system.
 </p>
 <p>
-A valid witness should be:</p>
+ETIP requires independent witnesses.
+</p>
 <ul>
-<li>Externally controlled (not owned by the data publisher)</li>
+<li>Not controlled by the data owner</li>
 <li>Publicly retrievable</li>
-<li>Append-only or resistant to modification</li>
+<li>Resistant to modification</li>
 </ul>
 <p>
-This ensures no single party can rewrite history unnoticed.
+No single system should be able to rewrite its own past.
 </p>
 </div>
 
 <div class="section">
-<h2>6. Data Model (Simplified)</h2>
-<h3>Commit Record</h3>
-<pre>{
-  "spec": "ETIP-1.1",
-  "seq": 123,
-  "type": "commit",
-  "prev_record_fp": "...",
-  "artifact_fp": "...",
-  "record_fp": "..."
-}</pre>
-
-<h3>Checkpoint Record</h3>
-<pre>{
-  "spec": "ETIP-1.1",
-  "seq": 456,
-  "type": "checkpoint",
-  "covers_seq": 455,
-  "publications": [...],
-  "checkpoint_fp": "..."
-}</pre>
-
+<h2>8. Infrastructure Philosophy</h2>
 <p>
-Each record contains a fingerprint of itself. This makes tampering immediately detectable.
+ETIP is designed to run in environments where resources are limited.
 </p>
-
-<h3>Optional: Revision Linking</h3>
-<pre>{
-  "supersedes": "previous_record_fp"
-}</pre>
 <p>
-This allows explicit tracking of corrections without altering past data.
+It does not assume large servers, continuous compute, or high energy availability.
+</p>
+<p>
+It can run on edge workers, small devices, or low-power systems.
+</p>
+<p>
+This is intentional.
+</p>
+<blockquote>
+Integrity should not depend on heavy infrastructure.
+</blockquote>
+<p>
+A system meant to improve accountability should not introduce unnecessary environmental cost.
 </p>
 </div>
 
 <div class="section">
-<h2>7. Threat Model (Reality Check)</h2>
-<p>
-ETIP is designed for environments where actors may have incentives to improve how their past data appears.
-</p>
-<p>
-It protects against:</p>
+<h2>9. Data Model</h2>
+<pre>{ "type": "commit", "prev": "...", "artifact": "..." }</pre>
+<pre>{ "type": "checkpoint", "witness": [...] }</pre>
+<pre>{ "supersedes": "previous" }</pre>
+</div>
+
+<div class="section">
+<h2>10. Threat Model</h2>
 <ul>
-<li>Silent rewriting of historical records</li>
-<li>Deletion of inconvenient past data</li>
-<li>Undetected modification of prior disclosures</li>
-</ul>
-
-<p>
-It does not protect against:</p>
-<ul>
-<li>False data being entered initially</li>
-<li>Data being withheld entirely</li>
-<li>Delaying publication before checkpointing</li>
+<li>Prevents silent rewriting of history</li>
+<li>Prevents unnoticed deletion</li>
+<li>Does not prevent false input</li>
+<li>Does not prevent omission</li>
 </ul>
 </div>
 
 <div class="section">
-<h2>8. Why This Matters (ESG Context)</h2>
+<h2>11. ESG Context</h2>
 <p>
-In ESG reporting, the most common issue is not blatant fraud, but quiet revision.
+ETIP does not stop companies from changing numbers.
 </p>
 <p>
-Numbers improve over time, but the history of those changes is often unclear or lost.
+It makes those changes visible.
 </p>
 <p>
-ETIP changes this dynamic:
+Auditors no longer look only at the latest value.
 </p>
-<ul>
-<li>Original disclosures remain visible</li>
-<li>Revisions become explicit events</li>
-<li>Auditors can evaluate the timeline, not just the latest state</li>
-</ul>
 <p>
-This shifts accountability from what is reported now to how reporting evolves over time.
+They look at how the value changed over time.
 </p>
 </div>
 
 <div class="section">
-<h2>9. Non-Claims</h2>
-<ul>
-<li>ETIP does not verify correctness</li>
-<li>ETIP does not enforce compliance</li>
-<li>ETIP does not issue tokens or assets</li>
-<li>ETIP does not replace auditing</li>
-</ul>
+<h2>12. Mandatory Non-Claims</h2>
+<p>
+ETIP does not verify truth.
+</p>
+<p>
+It does not certify correctness.
+</p>
+<p>
+It does not enforce compliance.
+</p>
+<p>
+It does not ensure completeness.
+</p>
+<p>
+It does not issue assets or tokens.
+</p>
+<p>
+It only preserves history.
+</p>
 </div>
 
 <div class="section">
-<h2>10. Changelog</h2>
-<h3>v1.1</h3>
+<h2>13. Changelog</h2>
 <ul>
 <li>Clarified "no later than" time guarantee</li>
 <li>Added explicit guarantees vs non-guarantees</li>
@@ -208,8 +221,12 @@ This shifts accountability from what is reported now to how reporting evolves ov
 <li>Added threat model explanation</li>
 <li>Introduced optional revision linking</li>
 <li>Refocused language on ESG audit use-case</li>
+<li>Restored narrative intent</li>
+<li>Clarified post-blockchain and post-infrastructure positioning</li>
+<li>Simplified language for broader accessibility</li>
 </ul>
 </div>
 
 </body>
 </html>
+
