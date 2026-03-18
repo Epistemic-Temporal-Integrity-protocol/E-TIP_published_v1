@@ -58,10 +58,12 @@ ETIP stands on existing ideas rather than replacing them.
 <li>Hash chaining — linking records so the past cannot be changed silently</li>
 <li>Merkle aggregation — compressing many records into a single proof</li>
 <li>Public witnessing — anchoring data outside the control of its creator</li>
-<li>Modern cryptographic primitives — fast, deterministic, widely available</li>
+<li>SHA-256 — collision-resistant fingerprinting standard</li>
+<li>Ed25519 — efficient, verifiable digital signatures</li>
+<li>JSON Canonicalization (RFC 8785) — deterministic data representation</li>
 </ul>
 <p>
-These are not new inventions. ETIP simply combines them into a minimal, usable form.
+These are not new inventions. ETIP combines them into a minimal, usable form.
 </p>
 </div>
 
@@ -85,7 +87,16 @@ These are not new inventions. ETIP simply combines them into a minimal, usable f
 <div class="section">
 <h2>5. Core Mechanism</h2>
 <p>
-Each record is reduced to a fingerprint.
+Each record is first converted into canonical form using JSON Canonicalization (RFC 8785).
+</p>
+<p>
+This ensures the same data always produces the same byte representation.
+</p>
+<p>
+Each record is then reduced to a fingerprint using SHA-256.
+</p>
+<p>
+The same input will always produce the same fingerprint.
 </p>
 <p>
 Each fingerprint links to the previous one.
@@ -97,7 +108,7 @@ This creates a chain.
 If any past record is changed, the chain breaks.
 </p>
 <p>
-The chain is periodically published to independent witnesses.
+The chain is periodically signed using Ed25519 and published to independent witnesses.
 </p>
 <p>
 Because those witnesses are outside the system, the past cannot be rewritten after publication.
@@ -198,9 +209,24 @@ A system meant to improve accountability should not increase environmental cost.
 
 <div class="section">
 <h2>10. Data Model</h2>
-<pre>{ "type": "commit", "prev": "...", "artifact": "..." }</pre>
-<pre>{ "type": "checkpoint", "witness": [...] }</pre>
+<pre>{
+  "type": "commit",
+  "prev": "sha256",
+  "artifact": "sha256",
+  "record_fp": "sha256"
+}</pre>
+<pre>{
+  "type": "checkpoint",
+  "signature": "ed25519",
+  "witness": [...]
+}</pre>
 <pre>{ "supersedes": "previous" }</pre>
+<p>
+All fingerprints are SHA-256 over canonicalized data.
+</p>
+<p>
+Signatures use Ed25519.
+</p>
 </div>
 
 <div class="section">
