@@ -3,16 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ETIP v1.1</title>
-<style>
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.7; margin: 40px; max-width: 920px; color:#111; }
-h1, h2, h3 { color: #111; }
-p { margin: 12px 0; }
-code, pre { background: #f6f8fa; padding: 10px; display: block; overflow-x: auto; border-radius:6px; }
-.section { margin-bottom: 42px; }
-.badge { display: inline-block; padding: 4px 8px; background: #eee; margin-right: 6px; border-radius: 4px; font-size:12px; }
-blockquote { border-left:4px solid #ddd; padding-left:14px; color:#444; }
-</style>
 </head>
 <body>
 
