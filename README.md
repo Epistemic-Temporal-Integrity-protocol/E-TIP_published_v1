@@ -1,280 +1,102 @@
-<h1>Epistemic Temporal Integrity Protocol (ETIP) v1.1</h1>
-<p>
-<span class="badge">Standards Track</span>
-<span class="badge">RFC 1.1</span>
-<span class="badge">March 2026</span>
-</p>
+<div align="center" style="background-color: #fff3cd; color: #856404; padding: 20px; border: 1px solid #ffeeba; border-radius: 6px; margin-bottom: 30px;">
+<h1 style="margin: 0; font-size: 1.4rem;">
+Please visit the homepage <a href="https://epistemic.center" style="color: #0052cc; text-decoration: underline;">epistemic.center</a>
+</h1>
+<p style="margin: 5px 0 0 0;">This GitHub serves as a draft versioning only.</p>
+</div>
 
-<div class="section">
-<h2>1. Positioning & Intent</h2>
-<p>
+Epistemic Temporal Integrity Protocol (ETIP) v1.1
+<div style="margin-bottom: 20px;">
+<img src="https://img.shields.io/badge/Version-1.1-blue" alt="Version 1.1">
+<img src="https://img.shields.io/badge/Status-Draft-orange" alt="Status">
+<img src="https://img.shields.io/badge/Focus-ESG_Integrity-green" alt="Focus">
+</div>
+
+Drafted by Y. Chen | LinkedIn Profile
+
+1. Positioning & Intent
 ETIP exists to solve a simple, stubborn problem: data can be quietly rewritten.
-</p>
-<p>
+
 In systems like ESG reporting, numbers do not just exist — they evolve. What is often lost is not the latest value, but the history of how that value came to be.
-</p>
-<blockquote>
-What did you say before — and did you change it later?
-</blockquote>
-<p>
-ETIP is designed so that this question always has an answer.
-</p>
-<p>
-It does not try to prove truth. It does not judge correctness. It does not enforce honesty.
-</p>
-<p>
-Instead, it does something narrower, but more reliable:
-</p>
-<blockquote>
-It makes it impossible to rewrite the past without leaving evidence.
-</blockquote>
-</div>
 
-<div class="section">
-<h2>2. Design Positioning</h2>
-<p>
-ETIP is a post-blockchain system, and also post-heavy infrastructure.
-</p>
-<p>
-It keeps what mattered — chaining, fingerprinting, external witnessing — and removes what did not: consensus overhead, global coordination, and energy-intensive operation.
-</p>
-<blockquote>
-ETIP takes what worked, and removes what didn’t.
-</blockquote>
-<p>
-It is not designed for consensus. It is not designed for markets. It is not designed for scale at any cost.
-</p>
-<p>
-It is designed for one thing only: preserving the integrity of data over time.
-</p>
-</div>
+"What did you say before — and did you change it later?"
 
-<div class="section">
-<h2>3. Historical Lineage</h2>
-<p>
-ETIP stands on existing ideas rather than replacing them.
-</p>
-<ul>
-<li>Hash chaining — linking records so the past cannot be changed silently</li>
-<li>Merkle aggregation — compressing many records into a single proof</li>
-<li>Public witnessing — anchoring data outside the control of its creator</li>
-<li>SHA-256 — collision-resistant fingerprinting standard</li>
-<li>Ed25519 — efficient, verifiable digital signatures</li>
-<li>JSON Canonicalization (RFC 8785) — deterministic data representation</li>
-</ul>
-<p>
-These are not new inventions. ETIP combines them into a minimal, usable form.
-</p>
-</div>
+ETIP is designed so that this question always has an answer. It does not try to prove truth or judge correctness; it makes it impossible to rewrite the past without leaving evidence.
 
-<div class="section">
-<h2>4. What ETIP Guarantees</h2>
-<ul>
-<li>History is append-only</li>
-<li>Changes are visible</li>
-<li>Past records cannot be silently altered</li>
-<li>A record existed no later than when it was witnessed externally</li>
-</ul>
+2. Design Positioning
+ETIP is a post-blockchain system, and also post-heavy infrastructure. It keeps what mattered — chaining, fingerprinting, external witnessing — and removes what did not: consensus overhead, global coordination, and energy-intensive operation.
 
-<p><b>ETIP does not guarantee:</b></p>
-<ul>
-<li>That the data is correct</li>
-<li>That all data was disclosed</li>
-<li>That measurements were accurate</li>
-</ul>
-</div>
+3. Historical Lineage
+ETIP stands on established industry standards:
 
-<div class="section">
-<h2>5. Core Mechanism</h2>
-<p>
-Each record is first converted into canonical form using JSON Canonicalization (RFC 8785).
-</p>
-<p>
-This ensures the same data always produces the same byte representation.
-</p>
-<p>
-Each record is then reduced to a fingerprint using SHA-256.
-</p>
-<p>
-The same input will always produce the same fingerprint.
-</p>
-<p>
-Each fingerprint links to the previous one.
-</p>
-<p>
-This creates a chain.
-</p>
-<p>
-If any past record is changed, the chain breaks.
-</p>
-<p>
-The chain is periodically signed using Ed25519 and published to independent witnesses.
-</p>
-<p>
-Because those witnesses are outside the system, the past cannot be rewritten after publication.
-</p>
-</div>
+Hash chaining — linking records for immutable sequencing.
 
-<div class="section">
-<h2>6. Levels of Use</h2>
+Merkle aggregation — compressing many records into a single proof.
 
-<h3>ETIP-Compatible</h3>
-<p>
-Records are chained internally.
-</p>
-<p>
-This provides integrity of sequence. Changes can be detected.
-</p>
-<p>
-No time claims are made at this level.
-</p>
+Public witnessing — anchoring data outside creator control.
 
-<h3>ETIP-Conformant</h3>
-<p>
-The chain is signed and published to independent witnesses.
-</p>
-<blockquote>
-A record existed no later than when it was witnessed.
-</blockquote>
-<p>
-This enables external verification and audit.
-</p>
+SHA-256 — collision-resistant fingerprinting standard.
 
-</div>
+Ed25519 — efficient, verifiable digital signatures.
 
-<div class="section">
-<h2>7. Time</h2>
-<p>
-ETIP does not prove exact time.
-</p>
-<blockquote>
-It proves that something existed no later than when it was witnessed.
-</blockquote>
-</div>
+JSON Canonicalization (RFC 8785) — deterministic data representation.
 
-<div class="section">
-<h2>8. Witnessing</h2>
-<p>
-A record is only meaningful if it is seen outside its own system.
-</p>
+4. What ETIP Guarantees
+History is append-only.
 
-<p>
-At least one Root Hash MUST be published within every 24-hour window.
-</p>
+Changes are visible.
 
-<p>
-A log is considered forensically sealed when anchored to at least two independent witness classes.
-</p>
+Past records cannot be silently altered.
 
-<h3>Witness Classes</h3>
-<ul>
-<li><b>Class A — Public Service</b>: Independent, publicly accessible, no direct stake in the data</li>
-<li><b>Class B — Conforming Participants</b>: Companies, associations, NGOs, institutions</li>
-<li><b>Class C — Timestamp Authorities</b>: Certified time-stamping services</li>
-</ul>
+A record existed no later than when it was witnessed externally.
 
-<h3>Public Service Witness Model</h3>
-<p>
-Because ETIP is low-cost, independent actors can run witnesses as a public service.
-</p>
-<p>
-Competitors, industry groups, NGOs, and institutions can witness each other.
-</p>
-<blockquote>
-No single party owns the truth, but many parties can preserve the history.
-</blockquote>
-<p>
-This creates mutual accountability without central control.
-</p>
-</div>
+5. Core Mechanism
+Each record is first converted into canonical form (RFC 8785), reduced to a SHA-256 fingerprint, and linked to the previous hash. The chain is periodically signed using Ed25519 and published to independent witnesses.
 
-<div class="section">
-<h2>9. Infrastructure Philosophy</h2>
-<p>
-ETIP is designed to run in constrained environments.
-</p>
-<p>
-It does not require large data centers or continuous high compute.
-</p>
-<p>
-It can operate on edge workers, small devices, and low-power systems.
-</p>
-<blockquote>
-Integrity should not depend on heavy infrastructure.
-</blockquote>
-<p>
-A system meant to improve accountability should not increase environmental cost.
-</p>
-</div>
+6. Levels of Use
+ETIP-Compatible: Records are chained internally. Provides integrity of sequence.
 
-<div class="section">
-<h2>10. Data Model</h2>
-<pre>{
+ETIP-Conformant: The chain is signed and published to independent witnesses.
+
+7. Time
+ETIP does not prove exact time. It proves that something existed no later than when it was witnessed.
+
+8. Witnessing
+At least one Root Hash MUST be published within every 24-hour window to be considered forensically sealed.
+
+Witness Classes
+Class A — Public Service: Independent, publicly accessible (e.g., public ledgers).
+
+Class B — Conforming Participants: Peer companies, NGOs, or industry groups.
+
+Class C — Timestamp Authorities: Certified time-stamping services.
+
+9. Infrastructure Philosophy
+ETIP is designed to run in constrained environments. Integrity should not depend on heavy infrastructure or increase environmental costs.
+
+10. Data Model
+JSON
+{
   "type": "commit",
   "prev": "sha256",
   "artifact": "sha256",
   "record_fp": "sha256"
-}</pre>
-<pre>{
-  "type": "checkpoint",
-  "signature": "ed25519",
-  "witness": [...]
-}</pre>
-<pre>{ "supersedes": "previous" }</pre>
-<p>
-All fingerprints are SHA-256 over canonicalized data.
-</p>
-<p>
-Signatures use Ed25519.
-</p>
-</div>
+}
+11. Threat Model
+Prevents silent rewriting of history and unnoticed deletion.
 
-<div class="section">
-<h2>11. Threat Model</h2>
-<ul>
-<li>Prevents silent rewriting of history</li>
-<li>Prevents unnoticed deletion</li>
-<li>Does not prevent false input</li>
-<li>Does not prevent omission</li>
-</ul>
-</div>
+Does not prevent false input or intentional omission.
 
-<div class="section">
-<h2>12. ESG Context</h2>
-<p>
-ETIP does not stop companies from changing numbers.
-</p>
-<p>
-It makes those changes visible.
-</p>
-<p>
-Auditors evaluate timelines, not snapshots.
-</p>
-</div>
+12. ESG Context
+ETIP makes changes visible. Auditors evaluate timelines, not snapshots.
 
-<div class="section">
-<h2>13. Mandatory Non-Claims</h2>
-<p>ETIP does not verify truth.</p>
-<p>ETIP does not certify correctness.</p>
-<p>ETIP does not enforce compliance.</p>
-<p>ETIP does not ensure completeness.</p>
-<p>ETIP does not issue assets or tokens.</p>
-<p>ETIP only preserves history.</p>
-</div>
+13. Mandatory Non-Claims
+ETIP does not verify truth, certify correctness, or enforce compliance.
 
-<h2>Changelog</h2>
-<ul>
-<li>Clarified "no later than" time guarantee</li>
-<li>Added explicit guarantees vs non-guarantees</li>
-<li>Strengthened witness definition</li>
-<li>Added threat model explanation</li>
-<li>Introduced optional revision linking</li>
-<li>Refocused language on ESG audit use-case</li>
-<li>Clarified post-blockchain and post-infrastructure positioning</li>
-<li>Simplified language for broader accessibility</li>
-</ul>
-</div>
+ETIP only preserves history.
 
-</body>
-</html>
+Draft Integrity Seal
+To verify the integrity of this README, use the following PowerShell command:
+Get-FileHash README.md -Algorithm SHA256
 
+© 2026 Y. Chen. All rights reserved. Visit epistemic.center for the authoritative version.
