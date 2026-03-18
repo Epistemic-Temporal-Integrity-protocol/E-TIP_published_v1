@@ -1,129 +1,225 @@
-<h1>Epistemic Temporal Integrity Protocol (ETIP) v1.0</h1>
-<p><strong>Category:</strong> Standards Track<br>
-<strong>Maintainer:</strong> epistemic.center<br>
-<strong>Status:</strong> RFC 1.0 (March 2026)</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETIP v1.1</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.7; margin: 40px; max-width: 920px; color:#111; }
+h1, h2, h3 { color: #111; }
+p { margin: 12px 0; }
+code, pre { background: #f6f8fa; padding: 10px; display: block; overflow-x: auto; border-radius:6px; }
+.section { margin-bottom: 42px; }
+.badge { display: inline-block; padding: 4px 8px; background: #eee; margin-right: 6px; border-radius: 4px; font-size:12px; }
+blockquote { border-left:4px solid #ddd; padding-left:14px; color:#444; }
+</style>
+</head>
+<body>
 
-<hr>
+<h1>Epistemic Temporal Integrity Protocol (ETIP) v1.1</h1>
+<p>
+<span class="badge">Standards Track</span>
+<span class="badge">RFC 1.1</span>
+<span class="badge">March 2026</span>
+</p>
 
-<h2>1. Positioning & Abstract</h2>
-<p>The <strong>Epistemic Temporal Integrity Protocol (ETIP)</strong> specifies a standardized, platform-agnostic, tamper-evident record and verification protocol. It provides a mathematical guarantee that a digital record existed at a specific point in time and has remained unchanged since its creation. By anchoring recursive mathematical chains (SHA-256) to a <strong>PGP-verified identity (Ed25519)</strong> and independent external witnesses, ETIP ensures that data authenticity is immutable and globally verifiable.</p>
+<div class="section">
+<h2>1. Positioning & Intent</h2>
+<p>
+ETIP exists to solve a simple, stubborn problem: data can be quietly rewritten.
+</p>
+<p>
+In many real-world systems—especially ESG reporting—numbers change over time. Sometimes legitimately. Sometimes conveniently. What is often missing is not the data itself, but a reliable way to answer a more important question:
+</p>
+<blockquote>
+What did you say before—and did you change it later?
+</blockquote>
+<p>
+ETIP does not attempt to prove whether data is true. It does not judge correctness, quality, or completeness.
+</p>
+<p>
+Instead, it enforces something more fundamental:
+</p>
+<blockquote>
+Once data is recorded, it cannot be silently rewritten without leaving evidence.
+</blockquote>
+</div>
+
+<div class="section">
+<h2>2. What ETIP Guarantees (and What It Does Not)</h2>
+<p><b>ETIP guarantees:</b></p>
 <ul>
-  <li><strong>Non-Asset System:</strong> ETIP does not describe tokens or "minting" and is not an asset system.</li>
-  <li><strong>Integrity vs. Truth:</strong> The protocol certifies <em>persistence</em> and <em>sequence</em>; it does not verify the "truthfulness" of the content.</li>
-  <li><strong>Platform Agnostic:</strong> Designed to function as a nominal cost in any data processing pipeline, regardless of architecture or provider.</li>
+<li>Records are append-only (history cannot be rewritten invisibly)</li>
+<li>Changes to data become visible as new entries</li>
+<li>A record existed no later than a verifiable external publication</li>
+<li>The sequence of records has not been tampered with</li>
 </ul>
 
-<h2>2. Historical Context & Priors</h2>
-<p>ETIP is a modern synthesis of four decades of cryptographic research, building upon the following specific historical precedents:</p>
+<p><b>ETIP does NOT guarantee:</b></p>
 <ul>
-  <li><strong>Haber & Stornetta (1991):</strong> For the invention of <strong>Hash Chaining</strong>. This solved the problem of digital document tampering by making each timestamp dependent on the one before it, removing the need for a trusted central party.</li>
-  <li><strong>Bayer, Haber & Stornetta (1993):</strong> For the introduction of Merkle-style aggregation, allowing thousands of documents to be represented by a single <strong>Root Hash</strong>. This provides the foundation for ETIP’s <strong>Hourly Bundling</strong>.</li>
-  <li><strong>The New York Times Public Witness (1995):</strong> Codifying the practice of anchoring internal data to an <strong>Independent Witness Channel</strong> (e.g., Surety’s weekly publication in the NYT classifieds) to prevent secret history rewriting.</li>
-  <li><strong>Daniel J. Bernstein (2011):</strong> For <strong>Ed25519</strong>, the high-performance Edwards-curve digital signature algorithm. Its efficiency allows ETIP to remain performant in restricted environments (e.g., &lt;10ms CPU windows).</li>
-  <li><strong>NIST/NSA:</strong> For <strong>SHA-256</strong> (Secure Hash Algorithm 2), providing the collision-resistant standard used for the protocol's primary fingerprinting.</li>
-  <li><strong>RFC 8785 (2020):</strong> For the <strong>JSON Canonicalization Scheme (JCS)</strong>, ensuring that a record hashed on any device produces the exact same Fingerprint.</li>
+<li>That data is correct</li>
+<li>That all data has been disclosed</li>
+<li>That measurements were accurate</li>
+<li>That actors behaved honestly</li>
 </ul>
 
-<hr>
+<p>
+This distinction is intentional. ETIP is an integrity protocol, not a truth engine.
+</p>
+</div>
 
-<h2>3. Conformance Levels</h2>
+<div class="section">
+<h2>3. Core Idea (Plain Language)</h2>
+<p>
+Each piece of data is converted into a unique fingerprint. That fingerprint depends on the exact contents of the data.
+</p>
+<p>
+Each new record links to the one before it. This creates a chain.
+</p>
+<p>
+If any past record is changed, the chain breaks.
+</p>
+<p>
+Periodically, the latest state of the chain is published to independent external systems. These act as witnesses.
+</p>
+<p>
+Because these witnesses are outside the control of the data owner, the history cannot be secretly rewritten after publication.
+</p>
+</div>
 
-<h3>3.1 ETIP-Compatible (Internal Integrity)</h3>
-<p><strong>Requirements:</strong> Canonicalize artifacts via JCS, fingerprint with <strong>SHA-256</strong>, append sequentially, and maintain <strong>Link Continuity</strong>. 
-<br><em>Internal Logic:</em> Artifacts captured within a 60-minute window are consolidated into an <strong>Hourly Bundle</strong>. No time claims are permitted at this level; it serves strictly as an internal proof of sequence.</p>
+<div class="section">
+<h2>4. Time Semantics</h2>
+<p>
+ETIP does not prove when something was created.
+</p>
+<p>
+It proves something weaker—but reliable:
+</p>
+<blockquote>
+A record existed no later than the moment it was independently witnessed.
+</blockquote>
+<p>
+This avoids reliance on internal clocks, which can be manipulated, and instead relies on external publication that cannot be rewritten.
+</p>
+</div>
 
-<h3>3.2 ETIP-Conformant (Forensically Sealed)</h3>
-<p><strong>Requirements:</strong> Satisfy 3.1, produce <strong>Checkpoints</strong> signed with an <strong>Ed25519 PGP key</strong>, and publish the terminal Root Hash to at least <strong>two (2) Independent Witness Channels</strong> every 24 hours.
-<br><em>Time Semantics:</em> Permits "No later than" claims for the ranges covered by the publication evidence.</p>
-
-<hr>
-
-<h2>4. Time Semantics & Epistemic Decay</h2>
-<p>ETIP supports <strong>upper-bound time ("no later than")</strong> only for ranges covered by ETIP-Conformant checkpoints. ETIP does not prove exact creation time because an author can falsify their own clock, but they cannot falsify the history of an independent witness.</p>
-
-<h3>4.1 Epistemic Decay (Informative)</h3>
-<p>While cryptographic integrity does not expire, the "Epistemic Value" (relevance/trustworthiness) of a record may decay. Implementers SHOULD define <strong>Decay Horizons</strong> at the verification layer (e.g., records are considered stale after 400 days if not re-witnessed or re-anchored).</p>
-
-<hr>
-
-<h2>5. Witness Classes (The Rule of Two)</h2>
-<p>A log is only <strong>Forensically Sealed</strong> if the Root Hash is published to a combination of:</p>
+<div class="section">
+<h2>5. The Rule of Two (Witnessing)</h2>
+<p>
+For a record to be considered forensically sealed, it must be published to at least two independent witness channels.
+</p>
+<p>
+A valid witness should be:</p>
 <ul>
-  <li><strong>Class A (Public Utility):</strong> Immutable public ledgers or decentralized networks.</li>
-  <li><strong>Class B (Independent Peer):</strong> A separate server/partner environment not under the log operator's control.</li>
-  <li><strong>Class C (Certified Timestamp):</strong> An RFC 3161 Time Stamping Authority (TSA).</li>
+<li>Externally controlled (not owned by the data publisher)</li>
+<li>Publicly retrievable</li>
+<li>Append-only or resistant to modification</li>
 </ul>
+<p>
+This ensures no single party can rewrite history unnoticed.
+</p>
+</div>
 
-<hr>
-
-<h2>6. Data Model & Schema</h2>
-
-<h3>6.1 Commit Record</h3>
-<pre bgcolor="#f6f8fa" style="padding:15px;">
-{
-  "spec": "ETIP-1.0",
-  "log_id": "string",
+<div class="section">
+<h2>6. Data Model (Simplified)</h2>
+<h3>Commit Record</h3>
+<pre>{
+  "spec": "ETIP-1.1",
   "seq": 123,
   "type": "commit",
-  "prev_record_fp": "hex-or-null",
-  "artifact_fp": "hex",
-  "pgp_fpr": "hex",
-  "record_fp": "hex"
-}
-</pre>
-<p><em>Self-hash rule: <code>record_fp = SHA256( JCS( record_minus_record_fp ) )</code></em></p>
+  "prev_record_fp": "...",
+  "artifact_fp": "...",
+  "record_fp": "..."
+}</pre>
 
-<h3>6.2 Checkpoint Record</h3>
-<pre bgcolor="#f6f8fa" style="padding:15px;">
-{
-  "spec": "ETIP-1.0",
-  "log_id": "string",
+<h3>Checkpoint Record</h3>
+<pre>{
+  "spec": "ETIP-1.1",
   "seq": 456,
   "type": "checkpoint",
   "covers_seq": 455,
-  "publications": [
-    {
-      "channel": "string",
-      "evidence_type": "url|rfc3161_tsr|other",
-      "evidence_ref": "string"
-    }
-  ],
-  "pgp_sig": "string",
-  "checkpoint_fp": "hex"
-}
-</pre>
+  "publications": [...],
+  "checkpoint_fp": "..."
+}</pre>
 
-<hr>
+<p>
+Each record contains a fingerprint of itself. This makes tampering immediately detectable.
+</p>
 
-<h2>7. Glossary & Terminology</h2>
-<dl>
-  <dt><strong>Artifact</strong></dt>
-  <dd>The item being committed (file, message, or state) in its raw form.</dd>
-  
-  <dt><strong>Canonical Bytes</strong></dt>
-  <dd>The deterministic byte representation of an artifact, ensuring cross-platform hash consistency via RFC 8785 (JCS).</dd>
+<h3>Optional: Revision Linking</h3>
+<pre>{
+  "supersedes": "previous_record_fp"
+}</pre>
+<p>
+This allows explicit tracking of corrections without altering past data.
+</p>
+</div>
 
-  <dt><strong>Checkpoint</strong></dt>
-  <dd>Identification of a log head carrying signed publication evidence in an independently retrievable channel.</dd>
+<div class="section">
+<h2>7. Threat Model (Reality Check)</h2>
+<p>
+ETIP is designed for environments where actors may have incentives to improve how their past data appears.
+</p>
+<p>
+It protects against:</p>
+<ul>
+<li>Silent rewriting of historical records</li>
+<li>Deletion of inconvenient past data</li>
+<li>Undetected modification of prior disclosures</li>
+</ul>
 
-  <dt><strong>Divergence</strong></dt>
-  <dd>A state where the calculated chain of fingerprints does not match the provided Root Hash, indicating tampering.</dd>
+<p>
+It does not protect against:</p>
+<ul>
+<li>False data being entered initially</li>
+<li>Data being withheld entirely</li>
+<li>Delaying publication before checkpointing</li>
+</ul>
+</div>
 
-  <dt><strong>Fingerprint</strong></dt>
-  <dd>A deterministic <strong>SHA-256</strong> digest of canonical bytes.</dd>
+<div class="section">
+<h2>8. Why This Matters (ESG Context)</h2>
+<p>
+In ESG reporting, the most common issue is not blatant fraud, but quiet revision.
+</p>
+<p>
+Numbers improve over time, but the history of those changes is often unclear or lost.
+</p>
+<p>
+ETIP changes this dynamic:
+</p>
+<ul>
+<li>Original disclosures remain visible</li>
+<li>Revisions become explicit events</li>
+<li>Auditors can evaluate the timeline, not just the latest state</li>
+</ul>
+<p>
+This shifts accountability from what is reported now to how reporting evolves over time.
+</p>
+</div>
 
-  <dt><strong>Link Continuity</strong></dt>
-  <dd>The mandatory reference to the <code>record_fp</code> of the immediately preceding entry (seq-1).</dd>
+<div class="section">
+<h2>9. Non-Claims</h2>
+<ul>
+<li>ETIP does not verify correctness</li>
+<li>ETIP does not enforce compliance</li>
+<li>ETIP does not issue tokens or assets</li>
+<li>ETIP does not replace auditing</li>
+</ul>
+</div>
 
-  <dt><strong>Root Hash</strong></dt>
-  <dd>The terminal <code>checkpoint_fp</code> representing the integrity of the entire dataset up to that sequence.</dd>
-</dl>
+<div class="section">
+<h2>10. Changelog</h2>
+<h3>v1.1</h3>
+<ul>
+<li>Clarified "no later than" time guarantee</li>
+<li>Added explicit guarantees vs non-guarantees</li>
+<li>Strengthened witness definition</li>
+<li>Added threat model explanation</li>
+<li>Introduced optional revision linking</li>
+<li>Refocused language on ESG audit use-case</li>
+</ul>
+</div>
 
-<hr>
-
-<h2>8. Mandatory Non-Claims</h2>
-<p>Implementations MUST explicitly state they: <strong>do not verify correctness</strong>, <strong>do not certify compliance</strong>, <strong>do not adjudicate truth</strong>, and <strong>do not issue assets</strong>.</p>
-
-<hr>
-
-<p><strong>[End of RFC-ETIP-1.0]</strong></p>
+</body>
+</html>
