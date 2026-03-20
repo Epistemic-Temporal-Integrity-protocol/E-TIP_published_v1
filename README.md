@@ -1,8 +1,7 @@
-<div align="center" style="background-color: #fff3cd; color: #856404; padding: 20px; border: 1px solid #ffeeba; border-radius: 6px; margin-bottom: 30px;">
-<h1 style="margin: 0; font-size: 1.4rem;">
-Please visit the homepage <a href="https://epistemic.center" style="color: #0052cc; text-decoration: underline;">epistemic.center</a>
-</h1>
-<p style="margin: 5px 0 0 0;">This GitHub serves as a draft versioning only.</p>
+<div align="center" style="background-color: #fff3cd; color: #856404; padding: 24px; border: 1px solid #ffeeba; border-radius: 8px; margin-bottom: 32px; font-family: sans-serif;">
+  <h1 style="margin: 0; font-size: 1.5rem;">Official Specification: <a href="https://epistemic.center" style="color: #0052cc; text-decoration: underline;">epistemic.center</a></h1>
+  <p style="margin: 10px 0 0 0; font-size: 1rem;">This GitHub repository serves as a <b>draft versioning node</b> only.</p>
+  <p style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.8;">Implementations: <a href="https://carbonprofile.world" style="color: #0052cc;">CarbonProfile.world</a> | <a href="https://epistemic.stream" style="color: #0052cc;">Mycelium</a></p>
 </div>
 
 Epistemic Temporal Integrity Protocol (ETIP) v1.1
