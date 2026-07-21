@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://epistemic.center">
+<title>ETIP v1.2 - Epistemic Temporal Integrity Protocol</title>
+<style>
+    :root {
+        --bg: #ffffff;
+        --text: #111111;
+        --muted: #444444;
+        --code-bg: #f6f8fa;
+        --border: #dddddd;
+        --accent: #0052cc;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --muted: #a0a0a0;
+            --code-bg: #1e1e1e;
+            --border: #333333;
+            --accent: #4c9aff;
+        }
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.7; margin: 0 auto; max-width: 920px; padding: 40px; color: var(--text); background: var(--bg); }
+    h1, h2, h3, h4, h5, h6 { color: var(--text); margin-top: 1.5em; border: none; }
+    p { margin: 16px 0; }
+    .badge { display: inline-block; padding: 4px 8px; background: var(--code-bg); border: 1px solid var(--border); margin-right: 6px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    blockquote { border-left: 4px solid var(--border); padding-left: 14px; color: var(--muted); font-style: italic; margin: 24px 0; }
+    code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.9em; }
+    pre { background: var(--code-bg); padding: 16px; overflow-x: auto; border-radius: 6px; border: 1px solid var(--border); margin: 16px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.9em; }
+    th, td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    th { background: var(--code-bg); font-weight: 600; }
+    .disclaimer-box { background: #fff5f5; border: 1px solid #feb2b2; padding: 20px; border-radius: 6px; margin: 24px 0; color: #9b2c2c; font-size: 0.9rem; }
+    @media (prefers-color-scheme: dark) {
+        .disclaimer-box { background: #2d1a1a; border: 1px solid #63171b; color: #feb2b2; }
+    }
+    .integrity-seal { background: var(--code-bg); border: 1px solid var(--border); padding: 24px; border-radius: 8px; margin-top: 60px; line-height: 1.6; clear: both; }
+    footer { margin-top: 80px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; font-size: 0.85rem; color: var(--muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+    ul, ol { margin: 12px 0; padding-left: 24px; }
+    li { margin: 4px 0; }
+  </style>
+</head>
+<body>
+<h1>Epistemic Temporal Integrity Protocol (ETIP) v1.2</h1>
+<p><em>Drafted by Y. Chen | https://www.linkedin.com/in/yipingchensg/</em></p>
+<div class="disclaimer-box"><strong>DISCLAIMER:</strong> This protocol is provided “as is” without warranty of any kind. ETIP is a tool for history preservation; it does not validate the truth, accuracy, or legality of the data being hashed. The author shall not be liable for any claims or damages arising from the use of this protocol.</div>
+<hr>
+<h3>1. Positioning & Intent</h3>
+<p>ETIP exists to solve a simple, stubborn problem: data can be quietly rewritten.</p>
+<p>In systems like ESG reporting, numbers do not just exist — they evolve. What is often lost is not the latest value, but the <strong>history</strong> of how that value came to be.</p>
+<blockquote><em>“What did you say before — and did you change it later?”</em></blockquote>
+<p>ETIP is designed so that this question always has an answer. It does not try to prove truth, judge correctness, or enforce honesty. Instead, it does something narrower, but more reliable:</p>
+<p><strong>It makes it impossible to rewrite the past without leaving evidence.</strong></p>
+<p>Do not describe ETIP using market language (e.g., “token”, “mint”).</p>
+<p>Do not treat ETIP as an asset system.</p>
+<p>Do not treat ETIP as verification of “truthfulness” of content.</p>
+<p>Do not treat ETIP as a consensus mechanism or blockchain.</p>
+<hr>
+<h3>2. Design Positioning</h3>
+<p>ETIP is a post‑blockchain system, and also post‑heavy infrastructure. It keeps what mattered — chaining, fingerprinting, external witnessing — and removes what didn’t: consensus overhead, global coordination, and energy‑intensive operation.</p>
+<p>ETIP takes what worked, and removes what didn’t.</p>
+<p>It is not designed for consensus, markets, or scale at any cost. It is designed for one thing only: <strong>preserving the temporal integrity of records</strong>.</p>
+<hr>
+<p><strong>3. Historical Lineage & Prior Art</strong></p>
+<p>ETIP stands on existing ideas rather than replacing them:</p>
+<ul>
+<li><strong>Hash chaining</strong> — linking records so the past cannot be changed silently</li>
+<li><strong>Merkle aggregation</strong> — compressing many records into a single proof</li>
+<li><strong>Public witnessing</strong> — anchoring data outside the control of its creator</li>
+<li><strong>SHA‑256</strong> — collision‑resistant fingerprinting standard</li>
+<li><strong>Ed25519</strong> — efficient, verifiable digital signatures</li>
+<li><strong>JSON Canonicalization (RFC 8785)</strong> — deterministic data representation</li>
+</ul>
+<p>ETIP acknowledges the foundational “Digital Notary” work by Haber and Stornetta (1991). It utilizes RFC 8785 for serialization, SHA‑256 for fingerprinting, Ed25519 for signatures, and aligns with the principles of Epistemic Integrity — ensuring justified belief in data states over time.</p>
+<hr>
+<p><strong>4. Terminology</strong></p>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<p>|------|------------|</p>
+<tr>
+<td>**Artifact**</td>
+<td>The item being committed to the log — a file, message, state snapshot, or any digital object.</td>
+</tr>
+<tr>
+<td>**Canonical bytes**</td>
+<td>A deterministic byte representation of an artifact. JSON artifacts are canonicalized using JSON Canonicalization Scheme (RFC 8785). Non‑JSON artifacts are treated as raw bytes, with no transformation.</td>
+</tr>
+<tr>
+<td>**Fingerprint**</td>
+<td>The SHA‑256 digest of an artifact’s canonical bytes, serving as a unique content‑dependent identifier.</td>
+</tr>
+<tr>
+<td>**Log**</td>
+<td>An ordered, append‑only sequence of records, uniquely identified by a `log_id`. Records within a log are numbered with monotonically increasing `seq` values.</td>
+</tr>
+<tr>
+<td>**Record**</td>
+<td>A JSON object that is hashed according to the self‑hash rule to produce a `record_fp`. Three record types exist: `commit`, `batch_marker`, and `checkpoint`.</td>
+</tr>
+<tr>
+<td>**Commit record**</td>
+<td>A record (`type: "commit"`) that binds one artifact’s fingerprint into the log, linking backward to the previous record.</td>
+</tr>
+<tr>
+<td>**Batch marker record**</td>
+<td>A special record (`type: "batch_marker"`) that closes a batch of commit records. It contains the batch’s Merkle root, a link to the previous batch root, and the updated chain root.</td>
+</tr>
+<tr>
+<td>**Link continuity**</td>
+<td>Each record includes a `prev_record_fp` field that holds the `record_fp` of the immediately preceding record (`seq‑1`). This forms an unbreakable sequential chain.</td>
+</tr>
+<tr>
+<td>**Checkpoint**</td>
+<td>A record (`type: "checkpoint"`) that captures the current chain root at a specific sequence number and includes evidence of having been published to independent witnesses.</td>
+</tr>
+<tr>
+<td>**Witness publication**</td>
+<td>The act of submitting a chain root (and its operator signature) to an independent witness, which issues a timestamped, signed receipt.</td>
+</tr>
+<tr>
+<td>**Independent witness channel**</td>
+<td>A publication endpoint whose administrative control lies outside the log operator’s domain. Multiple, unrelated channels are required for ETIP‑Conformant operation.</td>
+</tr>
+<tr>
+<td>**Batch**</td>
+<td>A contiguous, non‑empty subsequence of commit records whose fingerprints are aggregated into a single Merkle root.</td>
+</tr>
+<tr>
+<td>**Batch root**</td>
+<td>The top‑most hash of a binary Merkle tree built from the fingerprints of all commit records in a batch (padding with zero‑hashes to a balanced tree when necessary).</td>
+</tr>
+<tr>
+<td>**Chain root**</td>
+<td>The running integrity accumulator for a log. It is computed as `SHA‑256(batch_root</td>
+<td>previous_chain_root)` and updated whenever a new batch is closed. The current chain root is sealed in every batch marker and checkpoint.</td>
+</tr>
+<tr>
+<td>**Self‑hash rule**</td>
+<td>The method by which any record’s `record_fp` is computed: (1) remove the `record_fp` key from the record object; (2) serialize the remaining object with JCS; (3) compute SHA‑256 over those bytes; (4) insert the resulting hex string as the `record_fp` value.</td>
+</tr>
+<tr>
+<td>**Merkle authentication path**</td>
+<td>A list of sibling hashes (from leaf to root) that allows a verifier to recompute a batch root and thereby prove inclusion of a commit record in a particular batch.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><strong>5. What ETIP Guarantees & Threat Model</strong></p>
+<p>ETIP provides the following <strong>positive guarantees</strong>, assuming correct implementation:</p>
+<table>
+<thead>
+<tr>
+<th>Guarantee</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<p>|-----------|-------------|</p>
+<tr>
+<td>**Append‑only history**</td>
+<td>Once appended, a record cannot be removed or re‑ordered without detection.</td>
+</tr>
+<tr>
+<td>**Tamper‑evidence**</td>
+<td>Any alteration of a past record changes its fingerprint, which alters the batch root, which in turn changes the chain root — breaking all subsequent chaining and invalidating witness receipts.</td>
+</tr>
+<tr>
+<td>**Back‑dating resistance**</td>
+<td>A record existed **no later than** the moment its containing batch’s chain root was witnessed externally.</td>
+</tr>
+<tr>
+<td>**Deletion detection**</td>
+<td>Deletion of a record changes the batch root; deletion of an entire batch breaks the `prev_batch_root` chain. Neither goes unnoticed.</td>
+</tr>
+<tr>
+<td>**Sequential ordering**</td>
+<td>Monotonically increasing sequence numbers and hash‑links provide a trusted temporal order (a lower‑bound on creation time relative to earlier witnessed records).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ETIP explicitly does not guarantee:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Non‑guarantee</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<p>|---------------|-------------|</p>
+<tr>
+<td>**Data correctness**</td>
+<td>ETIP proves existence and sequence, not that the artifact’s content is factual.</td>
+</tr>
+<tr>
+<td>**Completeness**</td>
+<td>A log may omit records; ETIP does not prove that all relevant data was disclosed.</td>
+</tr>
+<tr>
+<td>**Measurement accuracy**</td>
+<td>The values inside artifacts may be erroneous or imprecise.</td>
+</tr>
+<tr>
+<td>**Truth adjudication**</td>
+<td>ETIP is silent on whether a claim is true, false, or misleading.</td>
+</tr>
+<tr>
+<td>**Resistance to key compromise**</td>
+<td>If the log operator’s Ed25519 signing key is stolen, an attacker can forge checkpoints. Mitigations include key rotation policies, multi‑witness co‑signing, and short‑lived keys.</td>
+</tr>
+<tr>
+<td>**Long‑term cryptographic strength**</td>
+<td>Future advances (e.g., quantum computing) may weaken SHA‑256 or Ed25519. Deployments should plan for crypto‑agility through algorithm identifiers in the log metadata.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Threat model refinements:</strong></p>
+<ul>
+<li>A malicious operator may attempt to back‑date a record after the fact by rebuilding the chain. This is prevented if a witness published a prior chain root before the back‑dated entry, because the newly‑computed chain root would conflict with the witnessed one.</li>
+<li>Collusion among witnesses could theoretically suppress evidence, but using multiple <strong>independent witness classes</strong> (see Section 10) mitigates this risk.</li>
+<li>Key compromise is the most severe failure mode; it breaks all checkpoint authenticity. ETIP therefore recommends that operator keys be rotated frequently, with each rotation event itself witnessed.</li>
+</ul>
+<hr>
+<p><strong>6. Core Mechanism & Canonicalization</strong></p>
+<p>Every record in an ETIP log is a JSON object. Before any hashing takes place, the record must be reduced to a deterministic byte sequence — its <strong>canonical bytes</strong> — following these rules:</p>
+<ul>
+<li><strong>JSON artifacts</strong>: Serialize the record <strong>minus the <code>record_fp</code> key</strong> using the JSON Canonicalization Scheme (RFC 8785). JCS sorts object keys, encodes strings as UTF‑8, and omits insignificant whitespace, ensuring the same logical object always produces the same bytes.</li>
+<li><strong>Non‑JSON artifacts</strong>: Treat the artifact body as raw bytes without any transformation. The artifact’s <code>content_type</code> indicates how it should later be interpreted.</li>
+<li><strong>Canonical bytes</strong> = a concatenation of:</li>
+<ol>
+<li>The JCS serialization of the record (without <code>record_fp</code>), for all record types.</li>
+<li>For commit records only, the artifact’s raw canonical bytes are hashed separately to form <code>artifact_fp</code>; they are <strong>not</strong> embedded in the record’s canonical bytes.</li>
+</ul>
+</ol>
+<p><strong>Self‑hash computation</strong> (<code>record_fp</code>):</p>
+<ol>
+<li>Temporarily remove the <code>record_fp</code> key from the record object.</li>
+<li>Apply JCS to the remaining object.</li>
+<li>Compute <code>SHA‑256</code> over the JCS output bytes.</li>
+<li>Set <code>record_fp</code> to the hexadecimal representation of that digest.</li>
+</ol>
+<p>This ensures each record’s fingerprint is a sealed hash of its own content <em>and</em> its backward link (<code>prev_record_fp</code>).</p>
+<p><strong>Append‑only log & link continuity:</strong></p>
+<ul>
+<li>Records MUST NOT be edited or deleted after being appended.</li>
+<li>The <code>seq</code> field starts at 1 and increments by 1 for each new record, scoped to <code>log_id</code>.</li>
+<li>Every record (except the very first) contains <code>prev_record_fp</code> set to the <code>record_fp</code> of the record with <code>seq‑1</code>. The first record uses <code>null</code>.</li>
+</ul>
+<p>This hash‑chain guarantees that any tampering with a single record cascades into all subsequent fingerprints, breaking the chain.</p>
+<p><strong>Record creation & ordering:</strong></p>
+<p>The log operator accumulates <code>commit</code> records. Periodically (e.g., after a fixed count or time interval), a <code>batch_marker</code> record is appended to close the batch. Checkpoint records may be appended at any time to capture the current chain root and publish it to witnesses.</p>
+<hr>
+<p><strong>7. Merkle Tree Compression</strong></p>
+<p>Merkle tree compression reduces an ordered set of commit records into a single verifiable digest — the batch root — enabling compact inclusion proofs without storing the entire log. This section formalizes the construction.</p>
+<hr>
+<p><strong>7.1 Batch construction</strong></p>
+<p>The log operator groups <strong>consecutive commit records</strong> (type <code>"commit"</code>) into a batch. The batch boundary is a local policy parameter, for example:</p>
+<ul>
+<li>A fixed number of commit records (e.g., every 1000 commits), or</li>
+<li>A fixed time window (e.g., every hour).</li>
+</ul>
+<p>Every batch <strong>MUST contain at least one commit record</strong>; an empty batch is not permitted and, if no commits occurred during the window, no batch marker is produced.</p>
+<p>For each batch, a binary Merkle tree is built:</p>
+<p><strong>Leaves:</strong></p>
+<p>Compute the <code>record_fp</code> of each commit record (as defined by the self‑hash rule). The tree’s leaves are the SHA‑256 digests of these <code>record_fp</code> values: <code>leaf_i = SHA‑256(record_fp_i)</code>.</p>
+<p><strong>Internal nodes:</strong></p>
+<p>For any pair of child node bytes <code>left</code> and <code>right</code> (each 32 bytes), the parent node is <code>SHA‑256( left || right )</code>.</p>
+<p><strong>Tree structure:</strong></p>
+<p>The tree MUST be <strong>balanced to the left</strong>. All leaves are placed at the same depth. If the number of leaves is not a power of two, the shortest tree is built by adding <strong>padding leaves</strong> with the value <code>SHA‑256("")</code> (the hash of empty bytes, i.e., <code>0xe3b0c44298fc1c14…</code>) until the leaf count reaches the next power of two. This construction is the traditional balanced binary Merkle tree; alternative configurations (like an unbalanced tree with explicit leaf count) may be defined in extensions but are not part of this specification.</p>
+<p>The <strong>batch root</strong> is the top‑most hash of this tree.</p>
+<p><strong>Batch marker record:</strong></p>
+<p>After the last commit record of a batch, the operator appends a special record of type <code>"batch_marker"</code> that seals the batch and links it to the chain root. The batch marker is a regular log record, subject to the same self‑hash rule and link continuity (<code>prev_record_fp</code> points to the preceding record, which will be the last commit record).</p>
+<p>The batch marker carries the following fields in addition to the common record fields:</p>
+<pre><code>
+{
+  "spec": "ETIP-2.1",
+  "log_id": "string",
+  "seq": 789,
+  "type": "batch_marker",
+  "prev_record_fp": "hex",
+  "batch_root": "hex",
+  "prev_batch_root": "hex",
+  "chain_root": "hex",
+  "record_fp": "hex"
+}
+</code></pre>
+<ul>
+<li><code>batch_root</code> — the Merkle root of the batch being closed.</li>
+<li><code>prev_batch_root</code> — the <code>batch_root</code> of the immediately preceding batch marker, or <code>null</code> for the first batch.</li>
+<li><code>chain_root</code> — the running chain root <strong>after</strong> incorporating this batch. It is computed as <code>SHA‑256( batch_root || previous_chain_root )</code>, where <code>previous_chain_root</code> is the <code>chain_root</code> of the preceding batch marker (or <code>null</code> for the first batch, yielding <code>SHA‑256( batch_root )</code>).</li>
+</ul>
+<p>The chain root is therefore a cumulative hash that anchors all batches up to this point.</p>
+<hr>
+<p><strong>7.2 Proof of inclusion</strong></p>
+<p>To prove that a specific commit record is contained in a given batch, a prover supplies:</p>
+<ol>
+<li>The commit record itself (including its <code>record_fp</code>).</li>
+<li>A <strong>Merkle authentication path</strong> — the ordered list of 32‑byte sibling hashes from the leaf up to the batch root.</li>
+<li>The <code>batch_root</code> as published in the batch marker record.</li>
+</ol>
+<p>Verification proceeds as follows:</p>
+<ul>
+<li>Compute <code>leaf = SHA‑256(record_fp)</code>.</li>
+<li>For each sibling in the path (from leaf to root), compute the parent hash accordingly: if the leaf was the left child of a pair, compute <code>parent = SHA‑256( leaf || sibling )</code>; if it was the right child, <code>parent = SHA‑256( sibling || leaf )</code>. The path must indicate left/right ordering (commonly by appending a single flag per step).</li>
+<li>The result after consuming all siblings must match the given <code>batch_root</code>.</li>
+</ul>
+<p>If the recomputed root matches, the commit record is proven to be part of that batch with the same integrity guarantee as if the entire log were present.</p>
+<hr>
+<p><strong>7.3 Chaining of batch roots (chain root)</strong></p>
+<p>Batch markers themselves form a linear chain through their <code>prev_batch_root</code> fields. This provides longitudinal integrity: any tampering with a batch root would change the <code>batch_root</code> of that batch’s marker, which would change the chain root stored in that same marker and all subsequent chain roots. The <strong>chain root</strong> is therefore the definitive integrity snapshot of the entire log.</p>
+<p>When the operator later creates a checkpoint record (Section 12), it records the current <code>chain_root</code> and publishes it to witnesses. Witness receipts bind that chain root to a point in time, thus sealing the entire log history up to that batch.</p>
+<p>Because the chain root depends on all prior batch roots, it protects against deletion or reordering of entire batches. Any attempt to remove a batch marker (and its batch) would break the <code>prev_batch_root</code> link in the next marker, and the chain root computation would no longer reproduce the witnessed value.</p>
+<hr>
+<p><strong>8. Levels of Use / Conformance</strong></p>
+<p>ETIP defines two conformance levels. They are cumulative: the higher level requires all the capabilities of the lower one.</p>
+<hr>
+<p><strong>8.1 ETIP‑Compatible (Basic Integrity)</strong></p>
+<p>A log implementation is <strong>ETIP‑Compatible</strong> if it satisfies all of the following:</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<p>|-------------|-------------|</p>
+<tr>
+<td>**Canonicalization**</td>
+<td>All records are serialized according to RFC 8785 (or treated as raw bytes for non‑JSON artifacts) before hashing.</td>
+</tr>
+<tr>
+<td>**Fingerprinting**</td>
+<td>SHA‑256 is used for all digest computations.</td>
+</tr>
+<tr>
+<td>**Append‑only sequencing**</td>
+<td>Records are assigned strictly increasing `seq` numbers scoped to a `log_id`.</td>
+</tr>
+<tr>
+<td>**Link continuity**</td>
+<td>Each record includes `prev_record_fp` referencing the previous record’s fingerprint (or `null` for the first).</td>
+</tr>
+<tr>
+<td>**Self‑hash rule**</td>
+<td>All record fingerprints are computed as specified (removing `record_fp`, canonicalizing, hashing).</td>
+</tr>
+<tr>
+<td>**Batch markers**</td>
+<td>Commit records are grouped into batches; each batch is closed by a valid batch marker record containing the batch root, previous batch root, and the updated chain root.</td>
+</tr>
+<tr>
+<td>**Immutability**</td>
+<td>Once appended, records are never edited or deleted.</td>
+</tr>
+</tbody>
+</table>
+<p>An ETIP‑Compatible log provides internal consistency, tamper‑evidence within its own sequence, and detection of any modification, but makes <strong>no time claims</strong> and does <strong>not involve external witnessing</strong>.</p>
+<hr>
+<p><strong>8.2 ETIP‑Conformant (Witnessed Integrity)</strong></p>
+<p>A log implementation is <strong>ETIP‑Conformant</strong> if it satisfies all requirements for ETIP‑Compatible <strong>and additionally</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<p>|-------------|-------------|</p>
+<tr>
+<td>**Checkpoint generation**</td>
+<td>The log periodically (at least once per 24‑hour window) creates a checkpoint record that captures the current `chain_root` and signs it with the log’s Ed25519 private key.</td>
+</tr>
+<tr>
+<td>**Witness publication**</td>
+<td>The operator publishes the signed checkpoint (chain root and signature) to **at least two independent witness channels** from distinct witness classes (see Section 10).</td>
+</tr>
+<tr>
+<td>**Witness receipt preservation**</td>
+<td>The operator stores witness receipts and references them in the checkpoint’s `publications` field, making them retrievable for auditors.</td>
+</tr>
+<tr>
+<td>**Public key availability**</td>
+<td>The log’s Ed25519 public key is published and independently verifiable (e.g., via a trusted static configuration or a separate attested channel).</td>
+</tr>
+</tbody>
+</table>
+<p>An ETIP‑Conformant log guarantees <strong>“existed no later than”</strong> for any record whose batch is covered by a witnessed checkpoint. The witness receipts provide external, non‑repudiable evidence of the log’s state at a point in time. Auditors can independently verify the full log history by recomputing the chain root and checking witness signatures.</p>
+<hr>
+<p><strong>9. Time Semantics</strong></p>
+<p>ETIP does not claim to prove an exact creation timestamp for any record. Instead, it provides two bounded temporal guarantees derived from sequential chaining and external witnessing.</p>
+<hr>
+<p><strong>9.1 Upper bound: “existed no later than”</strong></p>
+<p>A record’s existence can be bounded above by the earliest witness receipt that covers its batch.</p>
+<ul>
+<li>Suppose commit record <em>R</em> belongs to batch <em>B</em>. Batch <em>B</em> is closed with a batch marker that updates the chain root to <em>C</em>.</li>
+<li>Chain root <em>C</em> is subsequently included in a checkpoint and published to an independent witness. The witness issues a receipt with a timestamp <em>T</em>.</li>
+<li>Then <em>R</em> <strong>must have existed no later than time</strong> <em>T</em>.</li>
+</ul>
+<p>In other words, the data inside <em>R</em> cannot have been created <strong>after</strong> the moment the witness saw the chain root that incorporates that data. This is a forensic upper bound — it caps the latest possible creation time.</p>
+<p>When multiple witnesses publish receipts at different times, the <strong>earliest</strong> receipt timestamp provides the tightest upper bound for all records covered by that checkpoint.</p>
+<hr>
+<p><strong>9.2 Lower bound: “could not have existed before” (informative)</strong></p>
+<p>Because records in a log are strictly ordered by <code>seq</code> and each record’s fingerprint includes the fingerprint of its predecessor, the log also provides an <strong>implied lower bound</strong> on creation time.</p>
+<ul>
+<li>Suppose record <em>R</em> at <code>seq = n</code> has a predecessor record <em>S</em> at <code>seq = n‑1</code>.</li>
+<li><em>S</em> belongs to an earlier batch, and its batch’s chain root was witnessed at time <em>T_earlier</em>.</li>
+<li>Since <em>R</em> links backward to <em>S</em>, <em>R</em> <strong>cannot have been created before</strong> <em>T_earlier</em> — unless the operator had the ability to predict <em>S</em>’s fingerprint before <em>S</em> was appended and witnessed, which is infeasible under SHA‑256 pre‑image resistance.</li>
+</ul>
+<p>Thus, for two records <em>A</em> (earlier) and <em>B</em> (later), the time <em>A</em> was witnessed serves as a lower bound for <em>B</em>, and the time <em>B</em> was witnessed serves as an upper bound for <em>A</em>. Together, witnesses at regular intervals produce a tightening time window on the entire log.</p>
+<p><strong>Important caveat:</strong> The lower‑bound guarantee depends on trusting the log operator’s internal ordering. A malicious operator could, in principle, delay publishing a checkpoint and later insert records with earlier sequence numbers if no prior witness publication had constrained them. For this reason, frequent checkpointing (every 24 hours or less) is strongly recommended.</p>
+<hr>
+<p><strong>9.3 Epistemic decay (informative)</strong></p>
+<p>While the cryptographic integrity of a record does not degrade over time — SHA‑256 and Ed25519 signatures remain valid indefinitely against today’s adversaries — the <strong>epistemic value</strong> of old records may diminish in audit contexts.</p>
+<ul>
+<li><strong>Epistemic value</strong> is the degree to which a record supports a justified belief about a fact at a past point in time.</li>
+<li>Over long periods, changes in context, regulatory frameworks, or the discovery of omission may reduce the relevance of an old record, even though its mathematical integrity is intact.</li>
+</ul>
+<p>Implementers <strong>SHOULD</strong> define a <strong>decay horizon</strong> at the verification layer. A recommended default is <strong>400 days</strong> from the date of the first witness receipt covering a record. After this horizon, the record should be flagged as <strong>stale</strong> during audit verification, prompting reviewers to consider its continued relevance. This is a policy decision, not a protocol enforcement, and may vary by use case (e.g., financial audits may require shorter horizons; academic archives may tolerate longer ones).</p>
+<p>Witness class may influence decay: records witnessed by a <strong>Class C</strong> timestamp authority (RFC 3161) may carry a longer decay horizon than those witnessed only by a <strong>Class B</strong> participant, because the legal standing of the timestamp may extend the record’s practical useful life.</p>
+<hr>
+<p><strong>10. Witnessing & Discovery</strong></p>
+<p>A record’s integrity claim remains self‑contained as long as it stays inside the log operator’s system. It becomes <strong>forensically meaningful</strong> only when an external, independent party attests to having seen it at a point in time.</p>
+<hr>
+<p><strong>10.1 Witnessing requirement</strong></p>
+<p>To achieve ETIP‑Conformant status, a log operator MUST:</p>
+<ul>
+<li>Publish the current chain root to <strong>at least two (2) independent witness channels</strong> within every <strong>24‑hour period</strong>.</li>
+<li>Retain and reference each witness’s receipt in the log’s checkpoint records.</li>
+</ul>
+<p>If no checkpoint has been witnessed within 24 hours of the prior checkpoint, the log’s temporal guarantees are considered <strong>lapsed</strong> for records appended since the last witnessed checkpoint.</p>
+<hr>
+<p><strong>10.2 Witness classes</strong></p>
+<p>Witnesses are categorized into three classes based on their role, independence, and the epistemic weight they contribute.</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Description</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<p>|-------|-------------|----------|</p>
+<tr>
+<td>**Class A — Public Service**</td>
+<td>Independent, publicly accessible observers with no direct stake in the data. They exist to provide transparency and are run by unrelated third parties.</td>
+<td>Public archive services, data integrity nonprofits, research institutions offering free witnessing endpoints.</td>
+</tr>
+<tr>
+<td>**Class B — Conforming Participants**</td>
+<td>Organizations that have a direct or indirect relationship with the log operator (industry peers, consortium members, auditors) but operate under independent administration.</td>
+<td>Trade associations, ESG consortia, partner NGOs, institutional auditors.</td>
+</tr>
+<tr>
+<td>**Class C — Timestamp Authorities**</td>
+<td>Certified timestamping services that provide legally recognized temporal attestation, typically under standards such as RFC 3161 or eIDAS.</td>
+<td>Government‑accredited timestamp authorities, qualified trust service providers.</td>
+</tr>
+</tbody>
+</table>
+<p>Witnesses from <strong>Class C</strong> carry the highest individual epistemic weight due to legal and regulatory standing. Class A witnesses provide broad public visibility. Class B witnesses contribute distributed trust within a specific ecosystem.</p>
+<p>Blockchain‑based witnessing services are <strong>not recommended</strong> unless they provide demonstrable unique value without introducing consensus overhead, energy waste, or economic token dependencies that conflict with ETIP’s infrastructure philosophy (Section 11).</p>
+<hr>
+<p><strong>10.3 Recommended witness class combinations</strong></p>
+<p>To ensure high epistemic weight and resilience against single‑witness failure or collusion, the following combinations are recommended:</p>
+<table>
+<thead>
+<tr>
+<th>Combination</th>
+<th>Use Case</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<p>|-------------|----------|-----------|</p>
+<tr>
+<td>**Class A + B**</td>
+<td>Standard corporate accountability (e.g., ESG reporting)</td>
+<td>Bridges public transparency (A) with industry peer‑review (B).</td>
+</tr>
+<tr>
+<td>**Class B + B**</td>
+<td>Consortium‑based audit trails</td>
+<td>Distributes trust among multiple industry participants without requiring public disclosure.</td>
+</tr>
+<tr>
+<td>**Class A + C**</td>
+<td>High legal assurance</td>
+<td>Combines public visibility (A) with certified temporal authority (C); appropriate for regulated disclosures.</td>
+</tr>
+<tr>
+<td>**Class A + B + C**</td>
+<td>Maximum forensic integrity</td>
+<td>All three classes combined provide the strongest possible non‑repudiation for mission‑critical audit timelines.</td>
+</tr>
+</tbody>
+</table>
+<p>Using two witnesses of the <strong>same</strong> class is acceptable but provides lower epistemic diversity. The operator should select the combination that best matches their audit and regulatory context.</p>
+<hr>
+<p><strong>10.4 Witness communication interface</strong></p>
+<p>Every witness MUST expose a minimal HTTP API. The use of HTTPS (TLS 1.2 or higher) is <strong>REQUIRED</strong> for all witness communication to protect the integrity and confidentiality of submissions.</p>
+<p><strong>POST /witness</strong></p>
+<p>Submits a chain root for witnessing. The request body is a JSON object:</p>
+<pre><code>
+{
+  "chain_root": "<hex-encoded SHA-256 chain root>",
+  "signature": "<Ed25519 signature over the chain_root, hex-encoded>"
+}
+</code></pre>
+<ul>
+<li><code>chain_root</code> — the current chain root that the log operator wishes to have witnessed.</li>
+<li><code>signature</code> — the Ed25519 signature over the raw 32 bytes of the <code>chain_root</code>, produced by the log operator using the log’s private key. The witness <strong>MUST</strong> verify this signature against the log’s public key (obtained via the configuration methods in Section 10.5) before issuing a receipt. This prevents unauthorized parties from submitting fraudulent chain roots on behalf of the log.</li>
+</ul>
+<p>On success, the witness returns HTTP <strong>202 Accepted</strong> with a receipt body:</p>
+<pre><code>
+{
+  "chain_root": "<hex>",
+  "receipt_id": "<opaque string>",
+  "witness_id": "<witness url or identifier>",
+  "witness_timestamp": "<ISO 8601>",
+  "witness_signature": "<Ed25519 signature, hex-encoded>"
+}
+</code></pre>
+<ul>
+<li><code>receipt_id</code> — a unique identifier for this receipt, used for later retrieval.</li>
+<li><code>witness_signature</code> — the witness’s Ed25519 signature over the canonical bytes of the receipt object <strong>minus the <code>witness_signature</code> field</strong>, computed using the same self‑hash pattern as log records. Canonicalization uses JCS (RFC 8785). This ensures the receipt itself is tamper‑evident.</li>
+</ul>
+<p>If the signature verification fails, the witness returns HTTP <strong>403 Forbidden</strong> with an error message.</p>
+<p><strong>GET /witness/{chain_root}</strong></p>
+<p>Retrieves a previously issued receipt for the given chain root.</p>
+<ul>
+<li>Returns HTTP <strong>200 OK</strong> with the receipt JSON if a receipt exists.</li>
+<li>Returns HTTP <strong>404 Not Found</strong> if no receipt exists for the given chain root.</li>
+</ul>
+<hr>
+<p><strong>10.5 Witness configuration methods</strong></p>
+<p>There is no centralized global registry of witnesses. Implementors discover and configure witnesses using one or more of the following methods:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Status</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<p>|--------|--------|-------------|</p>
+<tr>
+<td>**Static configuration**</td>
+<td>**RECOMMENDED**</td>
+<td>A local configuration file lists witness URLs, their public keys, and their classes. This is the simplest and most reliable method for production use.</td>
+</tr>
+<tr>
+<td>**DNS TXT records**</td>
+<td>**OPTIONAL**</td>
+<td>Witness details may be published as a TXT record under a domain (e.g., `_etip-witness.example.com`). This allows domain‑controlled discovery but introduces DNS as a dependency.</td>
+</tr>
+<tr>
+<td>**Peer‑to‑peer manifest**</td>
+<td>**EXPERIMENTAL**</td>
+<td>A signed manifest of available witnesses can be exchanged between peer operators. This method is under evaluation and may change in future versions.</td>
+</tr>
+</tbody>
+</table>
+<p>Static configuration is RECOMMENDED because it avoids external runtime dependencies and simplifies auditing. Regardless of discovery method, all witness public keys MUST be obtained through an independent, trusted channel before the first submission.</p>
+<hr>
+<p><strong>11. Infrastructure Philosophy</strong></p>
+<p>ETIP is designed to run in constrained environments. It does not require large data centers, continuous high‑performance compute, or specialized hardware. It can operate on edge workers, small devices, and low‑power systems.</p>
+<hr>
+<p><strong>11.1 Guiding principle</strong></p>
+<blockquote><em>Integrity should not depend on heavy infrastructure.</em></blockquote>
+<p>Many data integrity systems have inherited the operational cost of blockchains — global consensus, proof‑of‑work, economically incentivized validators, continuous network participation. ETIP rejects these assumptions. Chaining, fingerprinting, and witnessing are computationally lightweight by design. SHA‑256 and Ed25519 are efficient on modern hardware, and even on constrained platforms (embedded ARM, low‑power SoCs, small‑footprint virtual machines), the cost of hashing and signing is negligible.</p>
+<p>A system meant to improve accountability should not increase environmental cost. The Merkle tree compression ensures that even the smallest system‑on‑chip can participate without burden to water, air, nature, or the surrounding ecosystem. There is no mining, no staking, no continuous network chatter.</p>
+<hr>
+<p><strong>11.2 Operational characteristics</strong></p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>ETIP</th>
+<th>Typical blockchain</th>
+</tr>
+</thead>
+<tbody>
+<p>|----------|------|-------------------|</p>
+<tr>
+<td>**Energy per record**</td>
+<td>Microjoules (one SHA‑256 + one Ed25519 sign)</td>
+<td>Kilowatt‑hours to megawatt‑hours (consensus)</td>
+</tr>
+<tr>
+<td>**Hardware required**</td>
+<td>Any CPU with ~1 MB RAM</td>
+<td>Data center, specialized ASICs, or high‑stake validators</td>
+</tr>
+<tr>
+<td>**Network dependency**</td>
+<td>Occasional HTTPS POST to witness</td>
+<td>Continuous peer‑to‑peer connectivity</td>
+</tr>
+<tr>
+<td>**Storage growth**</td>
+<td>~200 bytes per record + periodic batch marker</td>
+<td>Full ledger replication</td>
+</tr>
+<tr>
+<td>**Latency**</td>
+<td>Milliseconds (local append)</td>
+<td>Seconds to minutes (block time)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><strong>11.3 Deployment scenarios</strong></p>
+<p>ETIP is suitable for:</p>
+<ul>
+<li><strong>Edge logging</strong> — IoT devices, remote sensors, or offline systems that record events in the field and later synchronize with witnesses.</li>
+<li><strong>Embedded audit trails</strong> — Firmware update logs, configuration change trackers, and build‑process artifact chains.</li>
+<li><strong>Low‑resource environments</strong> — Regions or organizations with limited internet connectivity, intermittent power, or minimal compute capacity.</li>
+<li><strong>ESG and sustainability reporting</strong> — Where the energy footprint of the audit system itself is subject to scrutiny; ETIP avoids undermining the environmental goals it helps report on.</li>
+</ul>
+<p>The operator can run ETIP on a Raspberry Pi, a cloud function, or a dedicated server — the protocol imposes no minimum hardware requirement beyond the ability to compute SHA‑256 and Ed25519.</p>
+<hr>
+<p><strong>11.4 Environmental and social responsibility</strong></p>
+<p>ETIP’s design intentionally biases toward <strong>low‑impact operation</strong>. There is no token, no incentive to compete for block space, and no reason to increase computational expenditure beyond what is necessary for integrity. The protocol’s carbon footprint is effectively zero per record.</p>
+<p>This aligns ETIP with the broader goals of sustainable technology: tools that solve problems without creating new ones. If an audit system consumes more resources than the activity it audits, it has failed its own purpose. ETIP ensures that the integrity layer is never the environmental bottleneck.</p>
+<hr>
+<p><strong>12. Data Model (Schemas)</strong></p>
+<p>All fingerprints are SHA‑256 over canonicalized data. Signatures use Ed25519. The following schemas define the complete record types in an ETIP log.</p>
+<hr>
+<p><strong>12.1 Commit record</strong></p>
+<p>A commit record binds one artifact into the log. It is the most common record type.</p>
+<pre><code>
+{
+  "spec": "ETIP-2.1",
+  "log_id": "string",
+  "seq": 123,
+  "type": "commit",
+  "prev_record_fp": "hex-or-null",
+  "record_fp_alg": "sha-256",
+  "artifact_fp": "hex",
+  "meta": {
+    "content_type": "string",
+    "external_ref": "string"
+  },
+  "record_fp": "hex"
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<p>|-------|----------|-------------|</p>
+<tr>
+<td>`spec`</td>
+<td>Yes</td>
+<td>Protocol version identifier, always `"ETIP-2.1"`.</td>
+</tr>
+<tr>
+<td>`log_id`</td>
+<td>Yes</td>
+<td>Unique identifier for the log, scoping all records.</td>
+</tr>
+<tr>
+<td>`seq`</td>
+<td>Yes</td>
+<td>Monotonically increasing sequence number within this log.</td>
+</tr>
+<tr>
+<td>`type`</td>
+<td>Yes</td>
+<td>Always `"commit"` for commit records.</td>
+</tr>
+<tr>
+<td>`prev_record_fp`</td>
+<td>Yes</td>
+<td>The `record_fp` of the preceding record, or `null` for the first record.</td>
+</tr>
+<tr>
+<td>`record_fp_alg`</td>
+<td>Yes</td>
+<td>Hash algorithm used; always `"sha-256"`.</td>
+</tr>
+<tr>
+<td>`artifact_fp`</td>
+<td>Yes</td>
+<td>SHA‑256 fingerprint of the artifact’s canonical bytes.</td>
+</tr>
+<tr>
+<td>`meta.content_type`</td>
+<td>Yes</td>
+<td>MIME type or other type indicator for the artifact.</td>
+</tr>
+<tr>
+<td>`meta.external_ref`</td>
+<td>No</td>
+<td>Optional pointer to the artifact’s storage location.</td>
+</tr>
+<tr>
+<td>`record_fp`</td>
+<td>Yes</td>
+<td>Self‑hash per the self‑hash rule (Section 6).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Self‑hash rule for commit records:</strong> Remove <code>record_fp</code>, apply JCS to the remaining object, compute SHA‑256, and set the result as <code>record_fp</code>.</p>
+<hr>
+<p><strong>12.2 Batch marker record</strong></p>
+<p>A batch marker closes a batch of commit records and anchors the batch root into the chain root.</p>
+<pre><code>
+{
+  "spec": "ETIP-2.1",
+  "log_id": "string",
+  "seq": 789,
+  "type": "batch_marker",
+  "prev_record_fp": "hex",
+  "record_fp_alg": "sha-256",
+  "batch_root": "hex",
+  "prev_batch_root": "hex-or-null",
+  "chain_root": "hex",
+  "record_fp": "hex"
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<p>|-------|----------|-------------|</p>
+<tr>
+<td>`spec`</td>
+<td>Yes</td>
+<td>Protocol version, `"ETIP-2.1"`.</td>
+</tr>
+<tr>
+<td>`log_id`</td>
+<td>Yes</td>
+<td>Same as the log’s `log_id`.</td>
+</tr>
+<tr>
+<td>`seq`</td>
+<td>Yes</td>
+<td>Sequence number, immediately after the last commit record in the batch.</td>
+</tr>
+<tr>
+<td>`type`</td>
+<td>Yes</td>
+<td>Always `"batch_marker"`.</td>
+</tr>
+<tr>
+<td>`prev_record_fp`</td>
+<td>Yes</td>
+<td>`record_fp` of the last commit record in the batch.</td>
+</tr>
+<tr>
+<td>`record_fp_alg`</td>
+<td>Yes</td>
+<td>`"sha-256"`.</td>
+</tr>
+<tr>
+<td>`batch_root`</td>
+<td>Yes</td>
+<td>Merkle root of the batch being closed (Section 7).</td>
+</tr>
+<tr>
+<td>`prev_batch_root`</td>
+<td>Yes</td>
+<td>The `batch_root` of the previous batch marker, or `null` for the first batch.</td>
+</tr>
+<tr>
+<td>`chain_root`</td>
+<td>Yes</td>
+<td>`SHA‑256(batch_root \</td>
+<td>\</td>
+<td>previous_chain_root)`. For the first batch, `previous_chain_root` is treated as absent (hash only `batch_root`).</td>
+</tr>
+<tr>
+<td>`record_fp`</td>
+<td>Yes</td>
+<td>Self‑hash per the self‑hash rule.</td>
+</tr>
+</tbody>
+</table>
+<p>The chain root stored in the batch marker is the <strong>post‑update</strong> value — it includes this batch’s contribution. It becomes the <code>previous_chain_root</code> for the next batch marker.</p>
+<hr>
+<h3>12.3 Checkpoint Record</h3>
+<p>A checkpoint record captures the state of the log at a moment in time and attests that the chain root has been published to external witnesses. It is the evidence that moves the log from ETIP‑Compatible to ETIP‑Conformant.</p>
+<pre><code>
+{
+  "spec": "ETIP-2.1",
+  "log_id": "string",
+  "seq": 1001,
+  "type": "checkpoint",
+  "prev_record_fp": "hex",
+  "covers_seq": 1000,
+  "chain_root": "hex",
+  "operator_signature": "hex",
+  "witness_receipts": [
+    {
+      "witness_id": "url",
+      "chain_root": "hex",
+      "receipt_id": "string",
+      "witness_timestamp": "ISO8601",
+      "witness_signature": "hex"
+    }
+  ],
+  "checkpoint_fp": "hex"
+}
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<p>|-------|----------|-------------|</p>
+<tr>
+<td>`spec`</td>
+<td>Yes</td>
+<td>`"ETIP-2.1"`.</td>
+</tr>
+<tr>
+<td>`log_id`</td>
+<td>Yes</td>
+<td>Same log identifier.</td>
+</tr>
+<tr>
+<td>`seq`</td>
+<td>Yes</td>
+<td>Sequence number of this checkpoint record.</td>
+</tr>
+<tr>
+<td>`type`</td>
+<td>Yes</td>
+<td>`"checkpoint"`.</td>
+</tr>
+<tr>
+<td>`prev_record_fp`</td>
+<td>Yes</td>
+<td>`record_fp` of the immediately preceding record (typically a `batch_marker` or `commit` record).</td>
+</tr>
+<tr>
+<td>`covers_seq`</td>
+<td>Yes</td>
+<td>The `seq` of the last commit record (or `batch_marker`) whose chain root is being sealed. It establishes the upper bound of the log that is witnessed.</td>
+</tr>
+<tr>
+<td>`chain_root`</td>
+<td>Yes</td>
+<td>The chain root at the moment the checkpoint is taken (the value stored in the most recent `batch_marker`).</td>
+</tr>
+<tr>
+<td>`operator_signature`</td>
+<td>Yes</td>
+<td>Ed25519 signature over the raw 32‑byte `chain_root`, produced by the log operator’s private key. This signature is verified by witnesses before they issue a receipt.</td>
+</tr>
+<tr>
+<td>`witness_receipts`</td>
+<td>Yes</td>
+<td>Array of at least two witness receipts, each containing the witness’s timestamp and signature. The receipts themselves are tamper‑evident objects (signed by the witness).</td>
+</tr>
+<tr>
+<td>`checkpoint_fp`</td>
+<td>Yes</td>
+<td>Self‑hash of the checkpoint record (excluding this field).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Self‑hash rule for checkpoint records:</strong> identical to other record types — remove <code>checkpoint_fp</code>, apply JCS, hash with SHA‑256.</p>
+<p><strong>Inclusion of witness receipts:</strong> The receipts in the <code>witness_receipts</code> array are identical to the objects returned by the witnesses’ <code>POST /witness</code> endpoint. By embedding them directly in the log record, the checkpoint becomes self‑contained: an auditor can verify the operator’s signature, then verify each witness signature, and thereby confirm the chain root was observed externally at the recorded timestamps — all without retrieving separate witness archives.</p>
+<hr>
+<h3>13. ESG Context</h3>
+<p>ETIP does not stop companies from changing numbers. It makes those changes <strong>visible</strong>.</p>
+<p>In sustainability reporting (ESG), data evolves: baselines are recalculated, methodologies change, errors are discovered and corrected. What matters for trust is not a single snapshot, but the <strong>timeline</strong> — the sequence of what was claimed, when, and how it was later revised.</p>
+<p>ETIP provides the infrastructure for that timeline:</p>
+<ul>
+<li>An auditor can replay the log and see exactly when a number appeared, when it was superseded, and whether any record was retroactively altered.</li>
+<li>Witness receipts prove that a particular claim existed at a particular time, before any later scandal or restatement could have motivated its fabrication.</li>
+<li>Batch and chain roots allow auditors to verify an entire reporting history from a single chain root, without trusting the company’s internal archiving.</li>
+</ul>
+<p>Critically, ETIP itself does <strong>not</strong> interpret ESG data; it only preserves the historical record. The protocol is compatible with any reporting framework (GRI, SASB, ESRS, ISSB) and does not enforce any particular disclosure standard.</p>
+<hr>
+<h3>14. Mandatory Non‑Claims</h3>
+<p>All implementations of ETIP MUST prominently state that the protocol:</p>
+<ul>
+<li><strong>Does not verify correctness</strong> of the data.</li>
+<li><strong>Does not certify compliance</strong> with any regulation or standard.</li>
+<li><strong>Does not adjudicate truth</strong> or falsity of statements.</li>
+<li><strong>Does not ensure completeness</strong> of records.</li>
+<li><strong>Does not issue assets</strong> or tokens of any kind.</li>
+<li><strong>Does not protect against key compromise</strong> — a stolen operator key may allow forged checkpoints.</li>
+<li><strong>Does not offer perpetual cryptographic security</strong> — future advances may weaken SHA‑256 or Ed25519.</li>
+</ul>
+<p>ETIP <strong>only</strong> preserves temporal integrity: the order and existence of records, and the inability to alter them without breaking evidence.</p>
+<p>These non‑claims must appear in documentation, on‑premise interfaces, and any public‑facing tools that consume ETIP logs. Auditors and users must understand exactly what ETIP can and cannot deliver.</p>
+<hr>
+<h3>Changelog</h3>
+<p><strong>v1.2 (Revised)</strong></p>
+<ul>
+<li>Clarified self‑hash computation with explicit key‑removal rule.</li>
+<li>Added formal <code>batch_marker</code> record schema and chain root definition.</li>
+<li>Removed misleading “superseded” language from deletion guarantee.</li>
+<li>Specified that the log operator signs the chain root before witness submission, and that witnesses verify this signature.</li>
+<li>Added explicit canonicalization rule for witness receipt signing (self‑hash pattern).</li>
+<li>Renamed conformance levels to <strong>ETIP‑Compatible</strong> and <strong>ETIP‑Conformant</strong> for clarity.</li>
+<li>Added lower‑bound time guarantee (informative).</li>
+<li>Expanded epistemic decay guidance with witness‑class influence.</li>
+<li>Updated checkpoint record schema to include <code>operator_signature</code> and inline <code>witness_receipts</code>.</li>
+<li>Added key compromise and crypto‑agility to threat model and non‑claims.</li>
+<li>Clarified that every batch must contain at least one commit record.</li>
+</ul>
+<hr>
+<h3>Document Integrity Seal</h3>
+<p><strong>Note:</strong> Cloudflare or social media redirects may inject scripts or parameters. To verify integrity:</p>
+<ol>
+<li>Right‑click and select “View Page Source”.</li>
+<li>Copy from <code><!DOCTYPE html></code> to <code></html></code>.</li>
+<li>Save as <code>index.html</code> and run the command below.</li>
+</ol>
+<p><strong>Verification Sidecar:</strong></p>
+<p><code>/index.html.sha256</code></p>
+<p><strong>Verification Command (PowerShell):</strong></p>
+<pre><code>
+Get-FileHash index.html -Algorithm SHA256
+</code></pre>
+<p>© 2026 Y. Chen. Licensed under the Apache License, Version 2.0.</p>
+<p>Epistemic Temporal Integrity Protocol | Zero‑Dependency HTML5</p>
+</div>
+
+<footer>
+    <p>&copy; 2026 Y. Chen. Licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" style="color: var(--accent); text-decoration: none;">Apache License, Version 2.0</a>.</p>
+    <p>Epistemic Temporal Integrity Protocol | Zero-Dependency HTML5</p>
+</footer>
+</body>
+</html>
